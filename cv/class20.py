@@ -5,7 +5,7 @@
 # step4：OCR
 import cv2
 import numpy as np
-screenCnt=[]
+screenCnt = []
 def order_point(pts):
     # 一共四个坐标
     rect = np.zeros((4, 2), dtype="float32")
@@ -56,6 +56,7 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
         dim = (width, int(h * r))
     resized = cv2.resize(image, dim, interpolation=inter)
     return resized
+
 image = cv2.imread("E:/pycharmWorkplace/Grapefruit/cv/images/OCR1.jpg")
 ratio = image.shape[0] / 500.0
 orig = image.copy()
@@ -105,11 +106,32 @@ warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
 # 二值处理
 wraped1 = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
 
-t, ref = cv2.threshold(wraped1, 0, 255, cv2.THRESH_OTSU)
+t, ref = cv2.threshold(wraped1, 180, 255, cv2.THRESH_BINARY)
 
+ref2 = resize(ref, height=650)
+
+def ref_pro(ref):
+    ref1 = resize(ref, height=650)  # 上50 左 5 右 4  下 3   (650,396)
+
+    for i in range(70):
+        for j in range(396):
+            ref1[i, j] = 255
+    for i in range(650):
+        for j in range(5):
+            ref1[i, j] = 255
+    for i in range(640, 650):
+        for j in range(396):
+            ref1[i, j] = 255
+    for i in range(650):
+        for j in range(390, 396):
+            ref1[i, j] = 255
+    return ref1
+
+ref1 = ref_pro(ref)
 
 print("Step 3: 变换")
 cv2.imshow("Original", resize(orig, height=650))
-cv2.imshow("Scanned", resize(ref, height=650))
+cv2.imshow("Scanned2", ref2)
+cv2.imshow("Scanned", ref1)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
